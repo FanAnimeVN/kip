@@ -18,7 +18,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0 # kip needs history to compare with the team line
-      - uses: tiou/kip@main
+      - uses: FanAnimeVN/kip@main
         with:
           lang: vi # or en
           # Optional: also post to team chat (add the URL as a repository secret)

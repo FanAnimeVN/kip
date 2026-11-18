@@ -57,7 +57,7 @@ Options
   -v, --version        Print version
   -h, --help           Show this help
 
-Docs: https://github.com/tiou/kip`;
+Docs: https://github.com/FanAnimeVN/kip`;
 
 function fail(msg: string, code = 2): never {
   process.stderr.write(`${BIN_NAME}: ${msg}\n`);

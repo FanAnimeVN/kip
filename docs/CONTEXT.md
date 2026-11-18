@@ -73,13 +73,15 @@ Done in v0.1: everything above, 11 passing tests, demo verified in vi and en.
 
 Not verified yet (needs a real machine and real tools):
 - Claude Code actually injecting the SessionStart hook output on the founder's machine; Codex/Cursor/Copilot/Gemini actually following the AGENTS.md / rules instruction to run `kip brief`.
-- `npx -y @tiou/kip` (package not published yet), GitHub Action from `tiou/kip@main` (repo not created yet), Windows.
+- `npx -y @tiou/kip` (package not published yet; npm org `tiou` not created yet), GitHub Action from `FanAnimeVN/kip@main` on real GitHub.
+
+Verified on the founder's Windows 11 machine (2026-11-18, Node 25, Git Bash): `npm ci`, 11/11 tests, `kip demo` in vi and en, `kip brief --hook` and `kip check` in this repo.
 - **The real test:** running `kip check` / `kip brief --peek` on the founder's actual group-project repo history. Would it have caught the divergence on day 2?
 
 ## 7. Next steps (in order)
 
 1. **Autopsy the founder's real case**: run kip on the old team repo (check out the commit where they started diverging). Record what it would have said and when. That becomes the README story with real data.
-2. Create GitHub `tiou/kip` (or the founder's org), push, enable CI. Claim npm scope `@tiou`, `npm publish --access public`.
+2. ~~Create the GitHub repo and push~~ (done: https://github.com/FanAnimeVN/kip). Check CI is green. Claim npm scope `@tiou`, `npm publish --access public`.
 3. Dogfood: install kip in the founder's current group project, with the 4 teammates.
 4. 10 short interviews: "Have you ever finished something and found the team went another way? What message would have saved you?"
 5. v0.2: MCP server (`kip_brief`, `kip_check`, `kip_decide` tools), Discord bot with `/catchup` for non-coders, decision mining from merged PRs (proposal + ✅), more categories (Java/Kotlin, mobile).

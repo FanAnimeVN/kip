@@ -37,11 +37,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tiou/kip.git"
+    "url": "git+https://github.com/FanAnimeVN/kip.git"
   },
-  "homepage": "https://github.com/tiou/kip#readme",
+  "homepage": "https://github.com/FanAnimeVN/kip#readme",
   "bugs": {
-    "url": "https://github.com/tiou/kip/issues"
+    "url": "https://github.com/FanAnimeVN/kip/issues"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
