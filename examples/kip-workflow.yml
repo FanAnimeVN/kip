@@ -1,0 +1,27 @@
+# Copy to .github/workflows/kip.yml in your project.
+# Every pull request gets one plain-language summary comment (kept up to date),
+# plus warnings when the branch is heading a different way from the team.
+name: kip
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  catch-up:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # kip needs history to compare with the team line
+      - uses: tiou/kip@main
+        with:
+          lang: vi # or en
+          # Optional: also post to team chat (add the URL as a repository secret)
+          discord-webhook: ${{ secrets.KIP_DISCORD_WEBHOOK }}
+          # slack-webhook: ${{ secrets.KIP_SLACK_WEBHOOK }}
+          # strict: true   # fail the check when there are divergence warnings

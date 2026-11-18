@@ -1,0 +1,83 @@
+name: kip — team catch-up
+description: Plain-language PR summaries and early "we're building it two different ways" warnings, posted to the PR and your team chat.
+author: tiou
+branding:
+  icon: users
+  color: green
+
+inputs:
+  github-token:
+    description: Token used to comment on the pull request.
+    default: ${{ github.token }}
+  lang:
+    description: Output language, "vi" or "en" (default — .kip/config.json, then en).
+    default: ""
+  comment:
+    description: Post (and keep updating) one summary comment on the PR.
+    default: "true"
+  strict:
+    description: Fail the job when kip finds divergence warnings.
+    default: "false"
+  discord-webhook:
+    description: Discord incoming webhook URL (store it as a secret).
+    default: ""
+  slack-webhook:
+    description: Slack incoming webhook URL (store it as a secret).
+    default: ""
+
+outputs:
+  warnings:
+    description: Number of divergence warnings found.
+    value: ${{ steps.kip.outputs.warnings }}
+
+runs:
+  using: composite
+  steps:
+    - name: Build kip
+      shell: bash
+      run: |
+        cd "$GITHUB_ACTION_PATH"
+        npm ci --no-audit --no-fund --loglevel=error
+        npm run build --silent
+
+    - name: Summarize
+      id: kip
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+        KIP_DISCORD_WEBHOOK: ${{ inputs.discord-webhook }}
+        KIP_SLACK_WEBHOOK: ${{ inputs.slack-webhook }}
+        KIP_LANG_INPUT: ${{ inputs.lang }}
+        KIP_COMMENT: ${{ inputs.comment }}
+        KIP_STRICT: ${{ inputs.strict }}
+        BASE_BRANCH: ${{ github.base_ref || github.event.repository.default_branch }}
+        PR_NUMBER: ${{ github.event.pull_request.number }}
+        REPO: ${{ github.repository }}
+      run: |
+        set -euo pipefail
+        KIP="node $GITHUB_ACTION_PATH/dist/src/cli.js"
+        git fetch --no-tags --quiet origin "+refs/heads/${BASE_BRANCH}:refs/remotes/origin/${BASE_BRANCH}" || true
+        LANG_ARGS=()
+        if [ -n "$KIP_LANG_INPUT" ]; then LANG_ARGS=(--lang "$KIP_LANG_INPUT"); fi
+        NOTIFY_ARGS=()
+        if [ -n "$KIP_DISCORD_WEBHOOK$KIP_SLACK_WEBHOOK" ]; then NOTIFY_ARGS=(--notify); fi
+
+        $KIP summary --base "origin/${BASE_BRANCH}" --head HEAD "${LANG_ARGS[@]}" "${NOTIFY_ARGS[@]}" > "$RUNNER_TEMP/kip-summary.md"
+        cat "$RUNNER_TEMP/kip-summary.md" >> "$GITHUB_STEP_SUMMARY"
+        WARNINGS=$(grep -c '^- ⚠️' "$RUNNER_TEMP/kip-summary.md" || true)
+        echo "warnings=${WARNINGS:-0}" >> "$GITHUB_OUTPUT"
+
+        if [ "$KIP_COMMENT" = "true" ] && [ -n "${PR_NUMBER:-}" ]; then
+          EXISTING=$(gh api "repos/$REPO/issues/$PR_NUMBER/comments" --paginate \
+            --jq '[.[] | select(.body | startswith("<!-- kip-summary -->"))][0].id // empty' | head -n1)
+          if [ -n "$EXISTING" ]; then
+            gh api -X PATCH "repos/$REPO/issues/comments/$EXISTING" -F "body=@$RUNNER_TEMP/kip-summary.md" > /dev/null
+          else
+            gh api -X POST "repos/$REPO/issues/$PR_NUMBER/comments" -F "body=@$RUNNER_TEMP/kip-summary.md" > /dev/null
+          fi
+        fi
+
+        if [ "$KIP_STRICT" = "true" ] && [ "${WARNINGS:-0}" != "0" ]; then
+          echo "::error::kip found ${WARNINGS} divergence warning(s)"
+          exit 1
+        fi
