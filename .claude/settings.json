@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node dist/src/cli.js brief --hook",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}

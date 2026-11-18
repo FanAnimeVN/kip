@@ -1,0 +1,13 @@
+{
+  "lang": "en",
+  "remote": "origin",
+  "agents": [
+    "agents",
+    "claude",
+    "gemini",
+    "copilot",
+    "cursor"
+  ],
+  "command": "node dist/src/cli.js",
+  "claudeHook": true
+}
